@@ -1,0 +1,37 @@
+#!/bin/bash
+# This is a simple script and will be executed on your CI system if 
+# available.  Otherwise it will execute while your application is stopped
+# before the build step.  This script gets executed directly, so it
+# could be python, php, ruby, etc.
+if [ ! -d ${OPENSHIFT_DATA_DIR}bin ]; then
+
+  if [ "${OPENSHIFT_DATA_DIR}bin/python -V" != 'Python 3.4.1' ]; then
+    echo "install python-3.4.1..."
+    cd ${OPENSHIFT_TMP_DIR}
+    wget https://www.python.org/ftp/python/3.4.1/Python-3.4.1.tar.xz
+    tar xf Python-3.4.1.tar.xz
+    cd Python-3.4.1
+    ./configure --prefix=${OPENSHIFT_DATA_DIR}
+    make install
+  fi
+
+  # set path
+  export PATH=${OPENSHIFT_DATA_DIR}bin:$PATH
+
+  echo "install setuptools..."
+  cd $OPENSHIFT_TMP_DIR
+  wget http://pypi.python.org/packages/source/s/setuptools/setuptools-0.6c11.tar.gz
+  tar zxf setuptools-0.6c11.tar.gz
+  cd setuptools-0.6c11
+  python3.4 setup.py install
+
+  echo "install pip..."
+  cd $OPENSHIFT_TMP_DIR
+  wget http://pypi.python.org/packages/source/p/pip/pip-1.1.tar.gz
+  tar zxf pip-1.1.tar.gz
+  cd pip-1.1
+  python3.4 setup.py install
+
+  # cleanup
+  rm -rf ${OPENSHIFT_TMP_DIR}*
+fi
